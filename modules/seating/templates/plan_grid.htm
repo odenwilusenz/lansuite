@@ -1,0 +1,127 @@
+<div class="seatplan seatplan--mode-{$seat_mode}{if $seat_floorplan} seatplan--has-floor{/if}" data-mode="{$seat_mode}" data-floor-x="{$seat_floor_x}" data-floor-y="{$seat_floor_y}" data-floor-scale="{$seat_floor_scale}"{if $seat_mode == 2} data-tool="1"{/if}>
+{if $seat_mode == 2}
+  <p class="seatplan__current">{$seat_ui.selected|escape}: <strong class="seatplan__current-name">{$seat_ui.seat|escape}</strong></p>
+  <div class="seatplan__toolbar" role="toolbar" aria-label="{$seat_ui.tools|escape}">
+    <button type="button" class="seatplan__tool is-selected" data-tool="1" data-name="{$seat_ui.seat|escape}">
+      <span class="seatplan__glyph" data-symbol="1"></span>
+      <span>{$seat_ui.seat|escape}</span>
+    </button>
+    <button type="button" class="seatplan__tool" data-tool="0" data-name="{$seat_ui.empty|escape}">
+      <span class="seatplan__glyph" data-symbol="0"></span>
+      <span>{$seat_ui.empty|escape}</span>
+    </button>
+    <button type="button" class="seatplan__tool" data-tool="7" data-name="{$seat_ui.locked|escape}">
+      <span class="seatplan__glyph" data-symbol="7"></span>
+      <span>{$seat_ui.locked|escape}</span>
+    </button>
+  </div>
+  <details class="seatplan__room">
+    <summary>{$seat_ui.room|escape}</summary>
+    <div class="seatplan__room-grid">
+      {foreach from=$seat_room_tools item=tool}
+        <button type="button" class="seatplan__tool" data-tool="{$tool.id}" data-name="{$tool.name|escape}">
+          <span class="seatplan__glyph" data-symbol="{$tool.id}"></span>
+          <span class="seatplan__tool-name">{$tool.name|escape}</span>
+        </button>
+      {/foreach}
+    </div>
+  </details>
+  <label class="seatplan__letter">{$seat_ui.letter|escape}
+    <input type="text" class="seatplan__letter-input" maxlength="2" autocomplete="off" data-letter-label="{$seat_ui.letter|escape}" data-unknown="{$seat_ui.letter_unknown|escape}">
+  </label>
+  <p class="seatplan__note" hidden>{$seat_ui.occupied_note|escape}</p>
+{/if}
+
+{if $seat_mode == 0}
+  <ul class="seatplan__legend">
+    <li><span class="seatplan__swatch" data-symbol="1"></span> {$seat_ui.free|escape}</li>
+    <li><span class="seatplan__swatch" data-symbol="2"></span> {$seat_ui.taken|escape}</li>
+    <li><span class="seatplan__swatch" data-symbol="3"></span> {$seat_ui.marked|escape}</li>
+    <li><span class="seatplan__swatch" data-symbol="4"></span> {$seat_legend_mine|escape}</li>
+    <li><span class="seatplan__swatch" data-symbol="5"></span> {$seat_ui.clan|escape}</li>
+    <li><span class="seatplan__swatch" data-symbol="6"></span> {$seat_ui.checked_out|escape}</li>
+    <li><span class="seatplan__swatch" data-symbol="8"></span> {$seat_ui.checked_in|escape}</li>
+    <li><span class="seatplan__swatch" data-symbol="7"></span> {$seat_ui.locked|escape}</li>
+  </ul>
+  <div class="seatplan__zoom">
+    <button type="button" data-zoom="in">{$seat_ui.zoom_in|escape}</button>
+    <button type="button" data-zoom="out">{$seat_ui.zoom_out|escape}</button>
+    <button type="button" data-zoom="fit">{$seat_ui.zoom_fit|escape}</button>
+  </div>
+{/if}
+
+{if $seat_show_align}
+  <div class="seatplan__align">
+    <p class="seatplan__align-title">{$seat_ui.align|escape}</p>
+    <label>{$seat_ui.offset_x|escape}
+      <input type="number" name="floorplan_x" data-align="x" value="{$seat_floor_x}" min="-4000" max="4000" step="1">
+    </label>
+    <label>{$seat_ui.offset_y|escape}
+      <input type="number" name="floorplan_y" data-align="y" value="{$seat_floor_y}" min="-4000" max="4000" step="1">
+    </label>
+    <label>{$seat_ui.scale|escape}
+      <input type="number" name="floorplan_scale" data-align="scale" value="{$seat_floor_scale}" min="10" max="400" step="1">
+    </label>
+    {foreach from=$seat_aisles item=aisle}
+      <label>{$aisle.label|escape}
+        <input type="number" name="aisle_width[{$aisle.orient}][{$aisle.value}]" data-aisle-width="1" data-aisle-orient="{$aisle.orient}" data-aisle-value="{$aisle.value}" value="{$aisle.width}" min="4" max="400" step="1">
+      </label>
+    {/foreach}
+  </div>
+{/if}
+
+<div class="seatplan__scroll">
+  <div class="seatplan__stage">
+    {if $seat_floorplan}
+      <img class="seatplan__floor" src="{$seat_floorplan|escape}" alt="{$seat_ui.floorplan|escape}">
+    {/if}
+    <div class="seatplan__frame">
+      {if $seat_show_top}
+        <div class="seatplan__edge seatplan__edge--top">
+          <span>{$seat_labels.tl|escape}</span>
+          <span>{$seat_labels.tc|escape}</span>
+          <span>{$seat_labels.tr|escape}</span>
+        </div>
+      {/if}
+      <div class="seatplan__middle">
+        {if $seat_show_left}
+          <div class="seatplan__edge seatplan__edge--side">
+            <span>{$seat_labels.lt|escape}</span>
+            <span>{$seat_labels.lc|escape}</span>
+            <span>{$seat_labels.lb|escape}</span>
+          </div>
+        {/if}
+        <div class="seatplan__gridwrap">
+          {$seat_grid nofilter}
+        </div>
+        {if $seat_show_right}
+          <div class="seatplan__edge seatplan__edge--side">
+            <span>{$seat_labels.rt|escape}</span>
+            <span>{$seat_labels.rc|escape}</span>
+            <span>{$seat_labels.rb|escape}</span>
+          </div>
+        {/if}
+      </div>
+      {if $seat_show_bottom}
+        <div class="seatplan__edge seatplan__edge--bottom">
+          <span>{$seat_labels.bl|escape}</span>
+          <span>{$seat_labels.bc|escape}</span>
+          <span>{$seat_labels.br|escape}</span>
+        </div>
+      {/if}
+    </div>
+  </div>
+</div>
+
+{if $seat_mode == 2}
+  <div class="seatplan__hidden">{$seat_hidden nofilter}</div>
+{/if}
+
+{if $seat_mode == 0}
+  <div class="seatplan__detail">
+    <p class="seatplan__detail-empty">{$seat_ui.tap|escape}</p>
+    <div class="seatplan__detail-body" hidden></div>
+  </div>
+  <script type="application/json" class="seatplan__data">{$seat_json nofilter}</script>
+{/if}
+</div>

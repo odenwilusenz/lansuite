@@ -41,7 +41,11 @@ switch ($stepParameter) {
             text_rb = %string%,
             text_bl = %string%,
             text_bc = %string%,
-            text_br = %string%',
+            text_br = %string%,
+            floorplan = %string%,
+            floorplan_x = %int%,
+            floorplan_y = %int%,
+            floorplan_scale = %int%',
             $row['party_id'],
             $row['rows'],
             $row['cols'],
@@ -60,9 +64,26 @@ switch ($stepParameter) {
             $row['text_rb'],
             $row['text_bl'],
             $row['text_bc'],
-            $row['text_br']
+            $row['text_br'],
+            $row['floorplan'] ?? '',
+            (int)($row['floorplan_x'] ?? 0),
+            (int)($row['floorplan_y'] ?? 0),
+            (int)($row['floorplan_scale'] ?? 100)
         );
         $blockid = $db->insert_id();
+        $copiedFloorplan = str_replace('\\', '/', (string)($row['floorplan'] ?? ''));
+        if ($copiedFloorplan !== '' && is_file($copiedFloorplan) && str_starts_with($copiedFloorplan, 'ext_inc/seating/')) {
+            $extension = strtolower(pathinfo($copiedFloorplan, PATHINFO_EXTENSION));
+            if ($extension === 'jpeg') {
+                $extension = 'jpg';
+            }
+            if (in_array($extension, ['jpg', 'png', 'gif', 'webp'], true)) {
+                $destination = 'ext_inc/seating/block' . (int)$blockid . '.' . $extension;
+                if ($destination !== $copiedFloorplan && @copy($copiedFloorplan, $destination)) {
+                    $database->query("UPDATE %prefix%seat_block SET floorplan = ? WHERE blockid = ?", [$destination, $blockid]);
+                }
+            }
+        }
 
         $res = $db->qry('SELECT * FROM %prefix%seat_seats WHERE blockid = %int%', $_GET['blockid']);
         while ($row = $db->fetch_array($res)) {
@@ -98,10 +119,12 @@ switch ($stepParameter) {
                   SET
                     blockid = %int%,
                     orientation = %string%,
-                    value = %int%',
+                    value = %int%,
+                    width = %int%',
                     $blockid,
                     $row['orientation'],
-                    $row['value']
+                    $row['value'],
+                    (int)($row['width'] ?? 14)
                 );
         }
         $db->free_result($res);

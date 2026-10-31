@@ -26,11 +26,10 @@ while ($sponsor = $db->fetch_array($sponsoren)) {
     } else {
         $file_name = $sponsor['pic_path_button'];
         if ($file_name != '') {
-            if (is_file($file_name)) {
-                $ImgSize = GetImageSize($file_name);
-            }
-            if (!$ImgSize[0]) {
-                $ImgSize[0] = $cfg["sponsor_picwidth_small"];
+            $ImgSize = (is_file($file_name)) ? GetImageSize($file_name) : false;
+            // SVG and other formats PHP cannot measure fall back to the configured width.
+            if (!is_array($ImgSize) || !$ImgSize[0]) {
+                $ImgSize = [0 => $cfg["sponsor_picwidth_small"]];
             }
             if ($ImgSize[0] > $cfg["sponsor_picwidth_small"]) {
                 $ImgSize[0] = $cfg["sponsor_picwidth_small"];

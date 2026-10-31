@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/vendor/autoload.php';
+
 // Raise error reporting - could be interesting and this is automatically reset when index.php is executed
 error_reporting(E_ALL);
 

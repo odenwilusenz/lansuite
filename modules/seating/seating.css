@@ -1,0 +1,484 @@
+.seatplan {
+  --seat-free: #77ce4e;
+  --seat-taken: #c83232;
+  --seat-marked: #aaaa32;
+  --seat-mine: #3232aa;
+  --seat-clan: #326eaa;
+  --seat-out: #326e32;
+  --seat-locked: #9d9d9d;
+  --seat-in: #6e3232;
+  --seat-cell: 32px;
+  --seat-gap: 14px;
+  --seat-line: #c5c5c5;
+  --seat-label: #4d4d4d;
+  --seat-surface: #f6f6f6;
+  max-width: 100%;
+  color: #222;
+  font-size: 14px;
+  line-height: 1.3;
+}
+
+.seatplan__current {
+  margin: 0 0 8px;
+}
+
+.seatplan__toolbar,
+.seatplan__room-grid,
+.seatplan__align,
+.seatplan__zoom,
+.seatplan__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin: 0 0 12px;
+  padding: 0;
+  list-style: none;
+}
+
+.seatplan__tool,
+.seatplan__zoom button,
+.seatplan__letter-input,
+.seatplan__align input,
+.seatplan__action,
+.seatplan__aisle-btn,
+.seatplan__fill {
+  min-height: 44px;
+  font: inherit;
+}
+
+.seatplan__tool,
+.seatplan__zoom button,
+.seatplan__aisle-btn,
+.seatplan__action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid var(--seat-line);
+  border-radius: 6px;
+  background: #fff;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.seatplan__tool.is-selected,
+.seatplan__aisle-btn.is-on {
+  border-color: #3232aa;
+  box-shadow: inset 0 0 0 1px #3232aa;
+}
+
+.seatplan__tool .seatplan__glyph {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+}
+
+.seatplan__tool .seatplan__glyph[data-symbol="0"] {
+  background: #fff;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.35);
+}
+
+.seatplan__tool-name {
+  text-align: left;
+}
+
+.seatplan__room {
+  margin: 0 0 12px;
+}
+
+.seatplan__room-grid {
+  margin-top: 8px;
+}
+
+.seatplan__letter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+}
+
+.seatplan__letter-input {
+  width: 3rem;
+  text-align: center;
+}
+
+.seatplan__note {
+  margin: 0 0 12px;
+}
+
+.seatplan__swatch,
+.seatplan__glyph[data-symbol="1"],
+.seatplan__swatch[data-symbol="1"] { background: var(--seat-free); }
+.seatplan__glyph[data-symbol="2"],
+.seatplan__swatch[data-symbol="2"] { background: var(--seat-taken); }
+.seatplan__glyph[data-symbol="3"],
+.seatplan__swatch[data-symbol="3"] { background: var(--seat-marked); }
+.seatplan__glyph[data-symbol="4"],
+.seatplan__swatch[data-symbol="4"] { background: var(--seat-mine); }
+.seatplan__glyph[data-symbol="5"],
+.seatplan__swatch[data-symbol="5"] { background: var(--seat-clan); }
+.seatplan__glyph[data-symbol="6"],
+.seatplan__swatch[data-symbol="6"] { background: var(--seat-out); }
+.seatplan__glyph[data-symbol="7"],
+.seatplan__swatch[data-symbol="7"] { background: var(--seat-locked); }
+.seatplan__glyph[data-symbol="8"],
+.seatplan__swatch[data-symbol="8"] { background: var(--seat-in); }
+
+.seatplan__swatch {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.2);
+}
+
+.seatplan__legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.seatplan--mode-0 .seatplan__scroll {
+  overflow: hidden;
+  touch-action: none;
+  width: 100%;
+  min-height: 160px;
+  border: 1px solid var(--seat-line);
+  border-radius: 6px;
+  background: var(--seat-surface);
+}
+
+.seatplan--mode-1 .seatplan__scroll,
+.seatplan--mode-2 .seatplan__scroll,
+.seatplan--mode-4 .seatplan__scroll {
+  overflow: auto;
+  max-width: 100%;
+  border: 1px solid var(--seat-line);
+  border-radius: 6px;
+  background: var(--seat-surface);
+}
+
+.seatplan__stage {
+  position: relative;
+  display: inline-block;
+  min-width: 100%;
+}
+
+.seatplan img.seatplan__floor {
+  position: absolute;
+  z-index: 0;
+  left: 0;
+  top: 0;
+  width: auto;
+  height: auto;
+  max-width: none;
+  pointer-events: none;
+  transform-origin: top left;
+}
+
+.seatplan__frame {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+  padding: 8px;
+}
+
+.seatplan__edge {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.seatplan__edge span {
+  flex: 1;
+  min-height: 1.6em;
+  padding: 4px 6px;
+  background: #e4e4e4;
+  color: var(--seat-label);
+  text-align: center;
+}
+
+.seatplan__edge--side {
+  flex-direction: column;
+  width: 1.8rem;
+  margin: 0 4px 0 0;
+}
+
+.seatplan__edge--side span {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+}
+
+.seatplan__middle {
+  display: flex;
+  align-items: stretch;
+}
+
+.seatplan__grid {
+  border-collapse: separate;
+  border-spacing: 2px;
+  user-select: none;
+}
+
+.seatplan__grid th {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--seat-label);
+  text-align: center;
+  vertical-align: middle;
+}
+
+.seatplan__fill {
+  min-width: var(--seat-cell);
+  padding: 4px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.seatplan__grid td {
+  padding: 0;
+  line-height: 0;
+}
+
+.seatplan__cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: var(--seat-cell);
+  height: var(--seat-cell);
+  min-width: var(--seat-cell);
+  min-height: var(--seat-cell);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  vertical-align: middle;
+  line-height: 0;
+  font: inherit;
+  color: inherit;
+}
+
+button.seatplan__cell {
+  appearance: none;
+  cursor: pointer;
+}
+
+.seatplan--mode-4 button.seatplan__cell {
+  cursor: default;
+}
+
+.seatplan__cell .seatplan__glyph {
+  display: block;
+  width: calc(100% - 4px);
+  height: calc(100% - 4px);
+  margin: 2px;
+  border-radius: 3px;
+  box-sizing: border-box;
+}
+
+.seatplan__glyph[data-symbol="1"],
+.seatplan__glyph[data-symbol="2"],
+.seatplan__glyph[data-symbol="3"],
+.seatplan__glyph[data-symbol="4"],
+.seatplan__glyph[data-symbol="5"],
+.seatplan__glyph[data-symbol="6"],
+.seatplan__glyph[data-symbol="7"],
+.seatplan__glyph[data-symbol="8"] {
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.2);
+}
+
+.seatplan--mode-1 .seatplan__glyph[data-symbol="0"] {
+  background: var(--seat-locked);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.25);
+}
+
+.seatplan--mode-2 .seatplan__cell[data-symbol="0"] {
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.18);
+}
+
+.seatplan--mode-2 .seatplan__cell {
+  touch-action: none;
+}
+
+.seatplan__cell[data-locked="1"] {
+  cursor: not-allowed;
+}
+
+.seatplan__cell.is-selected .seatplan__glyph {
+  box-shadow: 0 0 0 2px #111;
+}
+
+.seatplan__aisle {
+  padding: 0;
+  width: 0;
+}
+
+.seatplan--mode-1 .seatplan__aisle {
+  width: auto;
+  min-width: 2.4rem;
+}
+
+.seatplan__aisle.is-on {
+  width: var(--aisle-size, var(--seat-gap));
+  min-width: var(--aisle-size, var(--seat-gap));
+  max-width: var(--aisle-size, var(--seat-gap));
+}
+
+.seatplan--mode-1 .seatplan__aisle.is-on {
+  width: auto;
+  max-width: none;
+}
+
+.seatplan__aisle-row .seatplan__aisle {
+  width: auto;
+  min-width: 0;
+  max-width: none;
+}
+
+.seatplan--mode-1 td.seatplan__aisle.is-on,
+.seatplan--mode-1 th.seatplan__aisle.is-on {
+  min-width: 3.6rem;
+  background: rgba(50, 50, 170, 0.12);
+}
+
+.seatplan__aisle-row th,
+.seatplan__aisle-row td {
+  padding: 0;
+  width: auto;
+  height: auto;
+}
+
+.seatplan__aisle-gap {
+  display: block;
+  height: 0;
+}
+
+.seatplan__aisle-row.is-on .seatplan__aisle-gap {
+  height: var(--aisle-size, var(--seat-gap));
+}
+
+.seatplan--mode-1 .seatplan__aisle-row th.seatplan__aisle.is-on {
+  min-width: 2.4rem;
+  background: transparent;
+}
+
+.seatplan--mode-1 .seatplan__aisle-row td.seatplan__aisle.is-on {
+  min-width: 0;
+  height: 3.6rem;
+  background: rgba(50, 50, 170, 0.12);
+}
+
+.seatplan--mode-1 .seatplan__aisle-row.is-on .seatplan__aisle-gap {
+  height: 3.6rem;
+}
+
+.seatplan__aisle-btn {
+  min-height: 32px;
+  padding: 2px 6px;
+  font-size: 12px;
+}
+
+.seatplan__glyph svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.seatplan__glyph.is-text {
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #111;
+}
+
+.seatplan--has-floor .seatplan__glyph[data-symbol="1"],
+.seatplan--has-floor .seatplan__glyph[data-symbol="2"],
+.seatplan--has-floor .seatplan__glyph[data-symbol="3"],
+.seatplan--has-floor .seatplan__glyph[data-symbol="4"],
+.seatplan--has-floor .seatplan__glyph[data-symbol="5"],
+.seatplan--has-floor .seatplan__glyph[data-symbol="6"],
+.seatplan--has-floor .seatplan__glyph[data-symbol="7"],
+.seatplan--has-floor .seatplan__glyph[data-symbol="8"] {
+  opacity: 0.9;
+}
+
+.seatplan__align label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+}
+
+.seatplan__align input {
+  width: 6rem;
+}
+
+.seatplan__align-title {
+  flex: 1 0 100%;
+  margin: 0;
+  font-weight: 700;
+}
+
+.seatplan__detail {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid var(--seat-line);
+  border-radius: 6px;
+  background: #fff;
+}
+
+.seatplan__detail-title {
+  margin: 0 0 8px;
+  font-size: 16px;
+}
+
+.seatplan__detail dl {
+  display: grid;
+  grid-template-columns: minmax(7rem, auto) 1fr;
+  gap: 4px 12px;
+  margin: 0 0 12px;
+}
+
+.seatplan__detail dt {
+  font-weight: 700;
+}
+
+.seatplan__detail dd {
+  margin: 0;
+}
+
+.seatplan__avatar {
+  display: block;
+  max-width: 120px;
+  height: auto;
+  margin: 0 0 8px;
+}
+
+.seatplan__action {
+  font-weight: 700;
+}
+
+.seatplan__note[hidden],
+.seatplan__detail-body[hidden],
+.seatplan__detail-empty[hidden],
+.seatplan__hidden {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .seatplan {
+    --seat-cell: 36px;
+  }
+
+  .seatplan__detail dl {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,238 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de" lang="de">
+<head>
+  <title>{$MainTitle}</title>
+  {$main_header_metatags}
+  <meta name="robots" content="index, follow" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="expires" content="900" />  
+	<meta name="description" content="Lansuite LAN-Party CMS"/>
+	<meta name="keywords" content="LAN-Party, LAN, Party, Games"/>
+  {$main_header_sitereload}
+  {$main_header_cssfiles}
+  <link rel="stylesheet" type="text/css" href="design/{$Design}/style.css" />
+  {if $IsMobileBrowser}<link rel="stylesheet" type="text/css" href="design/{$Design}/style_mobile.css" />{/if}
+  {$main_header_csscode} 
+
+  {$main_header_jsfiles}
+
+  {$main_header_jscode}
+  <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+  <link rel="alternate" type="application/rss+xml" title="RDF-Datei" href="ext_inc/newsfeed/news.xml" />
+  <!--[if lte IE 6]>
+  <style type="text/css">
+  {literal}div#Content { width: 70%; }{/literal}
+  </style>
+  <![endif]-->
+</head>
+
+
+<body onload="BodyOnload(1)" {$MainJS}>
+<a name="top"></a>
+<span id="LSloading" class="loading"></span>
+
+{if $MainContentStyleID == 'ContentFullscreen'}<div id="LansuiteFullscreen">{$CloseFullscreen}</div>
+{elseif $DisplayMode != 'popup' && $DisplayMode != 'print'}<button type="button" id="MenuToggle" class="menu-toggle" aria-expanded="false" aria-controls="SideMenus">
+  <span class="menu-toggle-bars" aria-hidden="true"></span>
+  Menü
+</button>
+<div id="Logo">
+  <pre class="logo-ascii" aria-label="Cyberdelia"> ▄████▄▓██   ██▓ ▄▄▄▄   ▓█████  ██▀███  ▓█████▄ ▓█████  ██▓     ██▓ ▄▄▄      
+▒██▀ ▀█ ▒██  ██▒▓█████▄ ▓█   ▀ ▓██ ▒ ██▒▒██▀ ██▌▓█   ▀ ▓██▒    ▓██▒▒████▄    
+▒▓█    ▄ ▒██ ██░▒██▒ ▄██▒███   ▓██ ░▄█ ▒░██   █▌▒███   ▒██░    ▒██▒▒██  ▀█▄  
+▒▓▓▄ ▄██▒░ ▐██▓░▒██░█▀  ▒▓█  ▄ ▒██▀▀█▄  ░▓█▄   ▌▒▓█  ▄ ▒██░    ░██░░██▄▄▄▄██ 
+▒ ▓███▀ ░░ ██▒▓░░▓█  ▀█▓░▒████▒░██▓ ▒██▒░▒████▓ ░▒████▒░██████▒░██░ ▓█   ▓██▒
+░ ░▒ ▒  ░ ██▒▒▒ ░▒▓███▀▒░░ ▒░ ░░ ▒▓ ░▒▓░ ▒▒▓  ▒ ░░ ▒░ ░░ ▒░▓  ░░▓   ▒▒   ▓▒█░
+  ░  ▒  ▓██ ░▒░ ▒░▒   ░  ░ ░  ░  ░▒ ░ ▒░ ░ ▒  ▒  ░ ░  ░░ ░ ▒  ░ ▒ ░  ▒   ▒▒ ░
+░       ▒ ▒ ░░   ░    ░    ░     ░░   ░  ░ ░  ░    ░     ░ ░    ▒ ░  ░   ▒   
+░ ░     ░ ░      ░         ░  ░   ░        ░       ░  ░    ░  ░ ░        ░  ░
+░       ░ ░           ░                  ░                                   </pre>
+  <!--
+  <img src="design/{$Design}/images/logo.svg" alt="Cyberdelia" />
+  -->
+</div>
+<div id="DateLogout">
+  {$smarty.now|date_format:"%d.%m.%Y"}{if $MainLogout} | {$MainLogout}{/if}
+</div>
+{if isset($MainBanner)}
+  <div id="Banner">{$MainBanner}</div>
+{/if}
+{/if}
+
+<div id="{$MainContentStyleID}">
+  {$MainFrameworkmessages}
+  {$MainContent}
+  <br />
+  <div id="Footer">{$Footer}</div>
+  {$MainDebug}
+</div>
+<div id="MenuBackdrop" class="menu-backdrop" aria-hidden="true"></div>
+<div id="SideMenus">
+  <div class="menu-drawer-bar">
+    <span id="MenuTitle" class="menu-title">Menü</span>
+    <button type="button" id="MenuClose" class="menu-close">Schließen</button>
+  </div>
+  <div id="BoxesLeft">{$MainLeftBox}</div>
+  <div id="BoxesRight">{$MainRightBox}</div>
+</div>
+{$EndJS}
+{literal}<script type="text/javascript">
+(function () {
+  var toggle = document.getElementById("MenuToggle");
+  var drawer = document.getElementById("SideMenus");
+  var closeButton = document.getElementById("MenuClose");
+  var backdrop = document.getElementById("MenuBackdrop");
+  if (!toggle || !drawer || !closeButton || !backdrop) {
+    return;
+  }
+
+  var query = window.matchMedia("(max-width: 767px)");
+  var scrollY = 0;
+
+  function mobile() {
+    return query.matches;
+  }
+
+  function shown(el) {
+    return el.getClientRects().length > 0;
+  }
+
+  function focusable() {
+    return Array.prototype.filter.call(
+      drawer.querySelectorAll("a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])"),
+      shown
+    );
+  }
+
+  function lockPage() {
+    var open = document.body.classList.contains("menu-open");
+    drawer.inert = open ? false : mobile();
+    if (mobile() && !open) {
+      drawer.setAttribute("aria-hidden", "true");
+    } else {
+      drawer.removeAttribute("aria-hidden");
+    }
+  }
+
+  function openMenu() {
+    if (!mobile() || document.body.classList.contains("menu-open")) {
+      return;
+    }
+    scrollY = window.pageYOffset || 0;
+    document.documentElement.classList.add("menu-open");
+    document.body.classList.add("menu-open");
+    document.body.style.position = "fixed";
+    document.body.style.top = "-" + scrollY + "px";
+    document.body.style.left = "0";
+    document.body.style.right = "0";
+    document.body.style.width = "100%";
+    toggle.setAttribute("aria-expanded", "true");
+    drawer.setAttribute("role", "dialog");
+    drawer.setAttribute("aria-modal", "true");
+    drawer.setAttribute("aria-labelledby", "MenuTitle");
+    lockPage();
+    closeButton.focus();
+  }
+
+  function closeMenu(restoreFocus) {
+    if (!document.body.classList.contains("menu-open")) {
+      lockPage();
+      return;
+    }
+    document.documentElement.classList.remove("menu-open");
+    document.body.classList.remove("menu-open");
+    document.body.style.position = "";
+    document.body.style.top = "";
+    document.body.style.left = "";
+    document.body.style.right = "";
+    document.body.style.width = "";
+    window.scrollTo(0, scrollY);
+    toggle.setAttribute("aria-expanded", "false");
+    drawer.removeAttribute("role");
+    drawer.removeAttribute("aria-modal");
+    drawer.removeAttribute("aria-labelledby");
+    lockPage();
+    if (restoreFocus && mobile()) {
+      toggle.focus();
+    }
+  }
+
+  toggle.addEventListener("click", function () {
+    if (document.body.classList.contains("menu-open")) {
+      closeMenu(true);
+    } else {
+      openMenu();
+    }
+  });
+  closeButton.addEventListener("click", closeMenu.bind(null, true));
+  backdrop.addEventListener("click", closeMenu.bind(null, true));
+
+  document.addEventListener("keydown", function (event) {
+    if (!document.body.classList.contains("menu-open")) {
+      return;
+    }
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closeMenu(true);
+      return;
+    }
+    if (event.key !== "Tab") {
+      return;
+    }
+    var items = focusable();
+    if (!items.length) {
+      event.preventDefault();
+      closeButton.focus();
+      return;
+    }
+    var first = items[0];
+    var last = items[items.length - 1];
+    if (items.indexOf(document.activeElement) === -1) {
+      event.preventDefault();
+      (event.shiftKey ? last : first).focus();
+      return;
+    }
+    if (first === last) {
+      event.preventDefault();
+      first.focus();
+      return;
+    }
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  });
+
+  document.addEventListener("wheel", function (event) {
+    if (document.body.classList.contains("menu-open") && !drawer.contains(event.target)) {
+      event.preventDefault();
+    }
+  }, {passive: false});
+
+  document.addEventListener("touchmove", function (event) {
+    if (document.body.classList.contains("menu-open") && !drawer.contains(event.target)) {
+      event.preventDefault();
+    }
+  }, {passive: false});
+
+  function onViewportChange() {
+    if (!mobile()) {
+      closeMenu(false);
+    } else {
+      lockPage();
+    }
+  }
+  if (query.addEventListener) {
+    query.addEventListener("change", onViewportChange);
+  } else if (query.addListener) {
+    query.addListener(onViewportChange);
+  }
+  lockPage();
+})();
+</script>{/literal}
+</body>
+</html>

@@ -68,6 +68,25 @@ switch ($stepParameter) {
                 break;
             }
         }
+        if (!$error) {
+            $floorplanUpload = $_FILES['floorplan'] ?? null;
+            $floorplanError = is_array($floorplanUpload) ? (int)($floorplanUpload['error'] ?? UPLOAD_ERR_NO_FILE) : UPLOAD_ERR_NO_FILE;
+            if (is_array($floorplanUpload) && !empty($floorplanUpload['name']) && $floorplanError !== UPLOAD_ERR_OK && $floorplanError !== UPLOAD_ERR_NO_FILE) {
+                $error['floorplan'] = t('Das Bild konnte nicht hochgeladen werden.');
+            } elseif ($floorplanError === UPLOAD_ERR_OK) {
+                $imageInfo = @getimagesize((string)$floorplanUpload['tmp_name']);
+                $imageType = is_array($imageInfo) ? (int)($imageInfo[2] ?? 0) : 0;
+                if (!in_array($imageType, [IMAGETYPE_JPEG, IMAGETYPE_PNG, IMAGETYPE_GIF, IMAGETYPE_WEBP], true)) {
+                    $error['floorplan'] = t('Bitte lade ein Bild hoch (PNG, JPEG, GIF oder WebP).');
+                }
+            }
+            foreach ($error as $key => $val) {
+                if ($val) {
+                    $_GET['step']--;
+                    break;
+                }
+            }
+        }
         break;
 
     // Update Seperators
@@ -96,7 +115,8 @@ switch ($stepParameter) {
                   SET
                     blockid = ?,
                     orientation = '1',
-                    value = ?", [$_GET['blockid'], $_GET['change_sep_row']]);
+                    value = ?,
+                    width = 14", [$_GET['blockid'], $_GET['change_sep_row']]);
             }
         }
 
@@ -123,7 +143,8 @@ switch ($stepParameter) {
                   SET
                     blockid = ?,
                     orientation = '0',
-                    value = ?", [$_GET['blockid'], $_GET['change_sep_col']]);
+                    value = ?,
+                    width = 14", [$_GET['blockid'], $_GET['change_sep_col']]);
             }
         }
         break;
@@ -162,6 +183,21 @@ switch ($stepParameter) {
             }
         }
         break;
+
+    case 8:
+        $floorplanRow = $database->queryWithOnlyFirstRow(
+            "SELECT floorplan FROM %prefix%seat_block WHERE blockid = ?",
+            [$_GET['blockid'] ?? 0]
+        );
+        $hasFloorplan = is_array($floorplanRow) && (string)($floorplanRow['floorplan'] ?? '') !== '';
+        if (!$hasFloorplan || isset($_POST['floorplan_scale'])) {
+            if ($hasFloorplan) {
+                $seat2->saveAisleWidths((int)($_GET['blockid'] ?? 0));
+                $seat2->saveFloorplanAlignment((int)($_GET['blockid'] ?? 0));
+            }
+            $_GET['step'] = 7;
+        }
+        break;
 }
 
 // Form-Switch
@@ -172,6 +208,7 @@ switch ($stepParameter) {
         break;
 
     case 2:
+        $currentFloorplan = '';
         $smarty->assign('text_tl', '');
         $smarty->assign('text_tc', '');
         $smarty->assign('text_tr', '');
@@ -251,6 +288,16 @@ switch ($stepParameter) {
             if (!array_key_exists('text_br', $_POST)) {
                 $_POST['text_br'] = $block['text_br'];
             }
+            if (!array_key_exists('floorplan_x', $_POST)) {
+                $_POST['floorplan_x'] = $block['floorplan_x'] ?? 0;
+            }
+            if (!array_key_exists('floorplan_y', $_POST)) {
+                $_POST['floorplan_y'] = $block['floorplan_y'] ?? 0;
+            }
+            if (!array_key_exists('floorplan_scale', $_POST)) {
+                $_POST['floorplan_scale'] = $block['floorplan_scale'] ?? 100;
+            }
+            $currentFloorplan = (string)($block['floorplan'] ?? '');
 
             $smarty->assign('text_tl', $_POST['text_tl']);
             $smarty->assign('text_tc', $_POST['text_tc']);
@@ -268,7 +315,7 @@ switch ($stepParameter) {
 
         $dsp->NewContent(t('Sitzblock erstellen'), t(' Mit Hilfe des folgenden Formulars kannst du einen neuen Sitzblock erstellen. In einem folgenden zweiten Schritt kannst du dann Plätze des Sitzblockes aktivieren bzw. deaktivieren um den Sitzblock deinen Bedürfnissen anzupassen.'));
         $blockIDParameter = $_GET['blockid'] ?? 0;
-        $dsp->SetForm("index.php?mod=seating&action={$_GET['action']}&step=3&blockid={$blockIDParameter}");
+        $dsp->SetForm("index.php?mod=seating&action={$_GET['action']}&step=3&blockid={$blockIDParameter}", '', '', 'multipart/form-data');
 
         $namePostParameter = $_POST['name'] ?? '';
         $colsPostParameter = $_POST['cols'] ?? '';
@@ -318,6 +365,14 @@ switch ($stepParameter) {
         $remarkParameter = $_POST['remark'] ?? '';
         $remarkError = $error['remark'] ?? '';
         $dsp->AddTextAreaPlusRow('remark', t('Bemerkung'), $remarkParameter, $remarkError, '', 4, 1);
+
+        $floorplanError = $error['floorplan'] ?? '';
+        $dsp->AddFileSelectRow('floorplan', t('Grundriss oder Foto'), $floorplanError, '', '', 1);
+        if ($currentFloorplan !== '' && $func->chk_img_path($currentFloorplan) && str_starts_with(str_replace('\\', '/', $currentFloorplan), 'ext_inc/seating/')) {
+            $dsp->AddDoubleRow(t('Aktueller Grundriss'), '<img src="' . htmlspecialchars($currentFloorplan, ENT_QUOTES, 'UTF-8') . '" alt="' . htmlspecialchars(t('Grundriss'), ENT_QUOTES, 'UTF-8') . '" style="max-width:100%;height:auto;">');
+            $dsp->AddCheckBoxRow('floorplan_remove', t('Grundriss entfernen'), '', '', 0, 0);
+        }
+
         $dsp->AddDoubleRow(t('Sitzblockbeschriftung'), $smarty->fetch('modules/seating/templates/plan_labels.htm'));
 
         // Partys
@@ -398,14 +453,14 @@ switch ($stepParameter) {
                 text_br = %string%
               WHERE blockid = %int%", $party->party_id, $_POST['group_id'], $_POST['price_id'], $_POST['name'], ($_POST['rows'] - 1), ($_POST['cols'] - 1), $_POST['orientation'], $_POST['u18'], $_POST['remark'], $_POST['text_tl'], $_POST['text_tc'], $_POST['text_tr'], $_POST['text_lt'], $_POST['text_lc'], $_POST['text_lb'], $_POST['text_rt'], $_POST['text_rc'], $_POST['text_rb'], $_POST['text_bl'], $_POST['text_bc'], $_POST['text_br'], $_GET['blockid']);
         }
+        $seat2->applyFloorplanFromRequest((int)$_GET['blockid']);
     // No Break!
     case 4:
         // Continue with seperator definition
-        $dsp->NewContent(t('Sitzblock Zwischengänge definieren'), t(' Abstände zwischen einzelnen Zeilen bzw. Reihen können mit den außen angezeigten Pfeilen eingefügt bzw. wieder gelöscht werden.'));
-
-        $dsp->AddSingleRow($seat2->DrawPlan($_GET['blockid'], 1));
+        $dsp->NewContent(t('Sitzblock Zwischengänge definieren'), t('Mit „Gang“ fügst du einen Abstand zwischen Zeilen oder Spalten ein. Ein zweiter Klick entfernt ihn wieder.'));
 
         $dsp->SetForm("index.php?mod=seating&action={$_GET['action']}&step=5&blockid={$_GET['blockid']}");
+        $dsp->AddSingleRow($seat2->DrawPlan($_GET['blockid'], 1));
         $dsp->AddFormSubmitRow(t('Weiter'));
         $dsp->AddBackButton("index.php?mod=seating&action={$_GET['action']}&step=2&blockid={$_GET['blockid']}", 'seating/add');
         break;
@@ -413,12 +468,25 @@ switch ($stepParameter) {
     // Seat-Selection
     case 5:
     case 6:
-        $dsp->NewContent(t('Sitzblock Sitze definieren'), t('Nun kannst du Plätze des Sitzblockes aktivieren bzw. deaktivieren um den Sitzblock deinen Bedürfnissen anzupassen.<br /><br />Ganze Reihen bzw. Spalten von Plätzen können aktiviert bzw. deaktiviert werden, indem du auf die Spalten- bzw. Reihen-Beschriftung  klicken.'));
+        $dsp->NewContent(t('Sitzblock Sitze definieren'), t('Wähle ein Werkzeug und zeichne damit in das Raster. Ziehen malt mehrere Felder. Ein Klick auf die Spalten- oder Reihenbeschriftung füllt die ganze Spalte oder Reihe. Belegte Plätze bleiben unverändert.'));
         $dsp->SetForm("index.php?mod=seating&action={$_GET['action']}&step=6&blockid={$_GET['blockid']}", "block");
         $dsp->AddSingleRow($seat2->DrawPlan($_GET['blockid'], 2));
         $dsp->AddFormSubmitRow(t('Speichern'));
-        $dsp->AddDoubleRow('', $dsp->FetchSpanButton(t('Weiter'), "index.php?mod=seating&action={$_GET['action']}&step=7&blockid={$_GET['blockid']}"));
+        $floorplanRow = $database->queryWithOnlyFirstRow(
+            "SELECT floorplan FROM %prefix%seat_block WHERE blockid = ?",
+            [$_GET['blockid'] ?? 0]
+        );
+        $nextStep = (is_array($floorplanRow) && (string)($floorplanRow['floorplan'] ?? '') !== '') ? 8 : 7;
+        $dsp->AddDoubleRow('', $dsp->FetchSpanButton(t('Weiter'), "index.php?mod=seating&action={$_GET['action']}&step={$nextStep}&blockid={$_GET['blockid']}"));
         $dsp->AddBackButton("index.php?mod=seating&action={$_GET['action']}&step=4&blockid={$_GET['blockid']}", 'seating/add');
+        break;
+
+    case 8:
+        $dsp->NewContent(t('Grundriss ausrichten'), t('Verschiebe und skaliere das Foto, bis es zu den Sitzplätzen passt. Gangbreiten ändern nur die Abstände im Raster, nicht die Skalierung des Fotos.'));
+        $dsp->SetForm("index.php?mod=seating&action={$_GET['action']}&step=8&blockid={$_GET['blockid']}");
+        $dsp->AddSingleRow($seat2->DrawPlan($_GET['blockid'], 4));
+        $dsp->AddFormSubmitRow(t('Speichern'));
+        $dsp->AddBackButton("index.php?mod=seating&action={$_GET['action']}&step=5&blockid={$_GET['blockid']}", 'seating/add');
         break;
 
     // Finished

@@ -17,7 +17,7 @@ switch ($stepParameter) {
 
     // Show seatplan
     case 2:
-        $dsp->NewContent(t('Sitzplatz - Informationen'), t('Fahre mit der Maus über einen Sitzplatz, um weitere Informationen zu erhalten.'));
+        $dsp->NewContent(t('Sitzplatz - Informationen'), t('Tippe auf einen Sitzplatz, um Details und Aktionen zu sehen.'));
 
         $current_url = 'index.php?mod=seating';
         $target_icon = '';

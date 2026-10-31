@@ -15,6 +15,11 @@ switch ($stepParameter) {
         break;
 
     case 3:
+        $floorplan = $database->queryWithOnlyFirstRow("SELECT floorplan FROM %prefix%seat_block WHERE blockid = ?", [$_GET['blockid']]);
+        if (is_array($floorplan) && !empty($floorplan['floorplan'])) {
+            $seat2 = new \LanSuite\Module\Seating\Seat2();
+            $seat2->deleteStoredFloorplan((string)$floorplan['floorplan']);
+        }
         $database->query("DELETE FROM %prefix%seat_block WHERE blockid = ?", [$_GET['blockid']]);
         $database->query("DELETE FROM %prefix%seat_sep WHERE blockid = ?", [$_GET['blockid']]);
         $database->query("DELETE FROM %prefix%seat_seats WHERE blockid = ?", [$_GET['blockid']]);

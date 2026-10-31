@@ -19,8 +19,8 @@ while ($sponsor = $db->fetch_array($sponsoren)) {
     // Else add Image-Tag
     } elseif ($sponsor["pic_path"] != "" and $sponsor["pic_path"] != "http://") {
         $ImgSize = @GetImageSize($sponsor["pic_path"]);
-        if (!$ImgSize[0]) {
-            $ImgSize[0] = 468;
+        if (!is_array($ImgSize) || !$ImgSize[0]) {
+            $ImgSize = [0 => 468];
         }
 
         if ($ImgSize[0] > $cfg["sponsor_picwidth"]) {

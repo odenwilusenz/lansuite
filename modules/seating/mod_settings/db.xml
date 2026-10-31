@@ -191,6 +191,38 @@
 				<default></default>
 				<extra></extra>
 			</field>
+			<field>
+				<name>floorplan</name>
+				<type>varchar(255)</type>
+				<null></null>
+				<key></key>
+				<default></default>
+				<extra></extra>
+			</field>
+			<field>
+				<name>floorplan_x</name>
+				<type>int(6)</type>
+				<null></null>
+				<key></key>
+				<default>0</default>
+				<extra></extra>
+			</field>
+			<field>
+				<name>floorplan_y</name>
+				<type>int(6)</type>
+				<null></null>
+				<key></key>
+				<default>0</default>
+				<extra></extra>
+			</field>
+			<field>
+				<name>floorplan_scale</name>
+				<type>int(4)</type>
+				<null></null>
+				<key></key>
+				<default>100</default>
+				<extra></extra>
+			</field>
 		</structure>
 	</table>
 	<table>
@@ -297,6 +329,14 @@
 				<null></null>
 				<key></key>
 				<default>0</default>
+				<extra></extra>
+			</field>
+			<field>
+				<name>width</name>
+				<type>smallint(5) unsigned</type>
+				<null></null>
+				<key></key>
+				<default>14</default>
 				<extra></extra>
 			</field>
 		</structure>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <link rel="stylesheet" href="../../ext_scripts/jquery-ui/jquery-ui.min.css" />
+  <link rel="stylesheet" href="../../design/style.css" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    div#Content { position: static; width: 720px; margin: 24px auto; }
+  </style>
+</head>
+<body>
+<div id="Content">
+  <h1>Modul-Konfiguration - Startseite</h1>
+  <div id="tabs">
+    <ul>
+      <li><a href="#tabs-0">Konfiguration</a></li>
+      <li><a href="#tabs-1">Zugriff</a></li>
+      <li><a href="#tabs-2">Datenbank</a></li>
+      <li><a href="#tabs-3">Menü</a></li>
+    </ul>
+    <div id="tabs-0">
+      <fieldset>
+        <legend><b>Allgemein</b></legend>
+        <p>Welche Startseite soll einem Admin angezeigt werden?</p>
+      </fieldset>
+    </div>
+    <div id="tabs-1">Zugriff</div>
+    <div id="tabs-2">Datenbank</div>
+    <div id="tabs-3">Menü</div>
+  </div>
+</div>
+<script src="../../ext_scripts/jquery-min.js"></script>
+<script src="../../ext_scripts/jquery-ui/jquery-ui.min.js"></script>
+<script>$(function () { $("#tabs").tabs(); });</script>
+</body>
+</html>
