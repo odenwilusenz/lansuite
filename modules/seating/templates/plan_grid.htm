@@ -1,3 +1,6 @@
+{if $seat_mode == 0 && $seat_remark}
+  <div class="seatplan__remark">{$seat_remark nofilter}</div>
+{/if}
 <div class="seatplan seatplan--mode-{$seat_mode}{if $seat_floorplan} seatplan--has-floor{/if}" data-mode="{$seat_mode}" data-floor-x="{$seat_floor_x}" data-floor-y="{$seat_floor_y}" data-floor-scale="{$seat_floor_scale}"{if $seat_mode == 2} data-tool="1"{/if}>
 {if $seat_mode == 2}
   <p class="seatplan__current">{$seat_ui.selected|escape}: <strong class="seatplan__current-name">{$seat_ui.seat|escape}</strong></p>

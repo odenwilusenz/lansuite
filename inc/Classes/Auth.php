@@ -166,6 +166,13 @@ class Auth
      * Default values for global variable $auth
      */
     private function getAuthenticationDefaultValues(): array {
+        global $config;
+
+        $design = 'simple';
+        if (!empty($config['lansuite']['default_design'])) {
+            $design = $config['lansuite']['default_design'];
+        }
+
         return [
             'sessid' => session_id(),
             'ip' => $_SERVER['REMOTE_ADDR'],
@@ -180,7 +187,7 @@ class Auth
             'username' => '',
             'userpassword' => '',
             'group_id' => 0,
-            'design' => 'simple', // TODO Get design from default configuration
+            'design' => $design,
             'clanid' => 0,
         ];
     }

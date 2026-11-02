@@ -76,7 +76,16 @@ class SeatPlanView
             $details
         );
 
+        $remark = '';
+        if ($mode === 0) {
+            $remarkText = trim((string)($block['remark'] ?? ''));
+            if ($remarkText !== '') {
+                $remark = $func->text2html($remarkText);
+            }
+        }
+
         $legendMine = $selectedUser ? t('Auswahl') : t('Dein Platz');
+        $smarty->assign('seat_remark', $remark);
         $smarty->assign('seat_mode', $mode);
         $smarty->assign('seat_ui', $this->uiText());
         $smarty->assign('seat_legend_mine', $legendMine);

@@ -224,6 +224,20 @@ div.Box li.box_entry_lvl_1_active > a {
   color: #ff4fd8;
 }
 
+li.box_entry,
+li.box_entry_active {
+  background-image: url(images/menu-dot.gif);
+  background-repeat: no-repeat;
+  background-position: 0 2px;
+}
+
+li.box_entry_lvl_1,
+li.box_entry_lvl_1_active {
+  background-image: url(images/menu-dot.gif);
+  background-repeat: no-repeat;
+  background-position: 8px 2px;
+}
+
 #SideMenus {
   display: contents;
 }
