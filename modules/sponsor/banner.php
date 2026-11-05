@@ -36,8 +36,8 @@ if ($banner && $banner['pic_path_banner'] == '' && file_exists($old_file_name)) 
 // If entry is HTML-Code
 if (str_starts_with($file_name, 'html-code://')) {
     $smarty->assign('MainBanner', $func->AllowHTML(substr($file_name, 12, strlen($file_name) - 12)));
-} else {
-  // If no Banner-Thumb was found, use LanSuite default banner
+} elseif ($file_name != '' || ($auth['design'] ?? '') !== 'cyberdelia') {
+    // Other designs keep the LanSuite banner when no sponsor image is selected.
     if ($file_name == '') {
         $file_name = 'ext_inc/banner/one_network_banner.jpg';
     }
@@ -49,7 +49,7 @@ if (str_starts_with($file_name, 'html-code://')) {
     if ($cfg['sys_internet'] && $banner && $banner["sponsorid"]) {
         $code = '<a href="index.php?mod=sponsor&amp;action=bannerclick&amp;design=base&amp;type=banner&amp;sponsorid='. $banner["sponsorid"] .'" target="_blank">'. $code .'</a>';
     }
-  
+
     $smarty->assign('MainBanner', $code);
     unset($code);
 }

@@ -398,14 +398,17 @@
             viewport.style.height = Math.max(160, Math.min(window.innerHeight * 0.7, height)) + 'px';
         }
 
-        function fit() {
+        function fittedScale() {
             var available = viewport.clientWidth || 0;
             var contentWidth = stage.offsetWidth || 0;
             if (available > 0 && contentWidth > 0) {
-                scale = Math.min(1, available / contentWidth);
-            } else {
-                scale = 1;
+                return Math.min(1, available / contentWidth);
             }
+            return 1;
+        }
+
+        function fit() {
+            scale = fittedScale();
             x = 0;
             y = 0;
             apply();
@@ -415,7 +418,16 @@
             var rect = viewport.getBoundingClientRect();
             var px = clientX - rect.left;
             var py = clientY - rect.top;
-            var next = Math.min(4, Math.max(0.2, scale * factor));
+            var floor = fittedScale();
+            var next = Math.min(4, Math.max(floor, scale * factor));
+            if (next <= floor + 0.001) {
+                scale = floor;
+                x = 0;
+                y = 0;
+                userAdjusted = false;
+                apply();
+                return;
+            }
             var ratio = next / scale;
             x = px - ratio * (px - x);
             y = py - ratio * (py - y);
@@ -427,12 +439,6 @@
         root.querySelectorAll('[data-zoom]').forEach(function (button) {
             button.addEventListener('click', function () {
                 var rect = viewport.getBoundingClientRect();
-                if (button.dataset.zoom === 'fit') {
-                    userAdjusted = false;
-                    placeFloor(root);
-                    fit();
-                    return;
-                }
                 zoomAt(rect.left + rect.width / 2, rect.top + rect.height / 2, button.dataset.zoom === 'in' ? 1.2 : 0.8);
             });
         });
@@ -493,7 +499,7 @@
                 pan.moved = true;
                 userAdjusted = true;
             }
-            if (pan.moved) {
+            if (pan.moved && scale > fittedScale() + 0.001) {
                 x = pan.ox + dx;
                 y = pan.oy + dy;
                 apply();

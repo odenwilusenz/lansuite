@@ -151,7 +151,6 @@ class SeatPlanView
             'checked_in' => t('Besetzt (Eingecheckt)'),
             'zoom_in' => t('Größer'),
             'zoom_out' => t('Kleiner'),
-            'zoom_fit' => t('Einpassen'),
             'align' => t('Grundriss ausrichten'),
             'offset_x' => t('Versatz horizontal'),
             'offset_y' => t('Versatz vertikal'),
