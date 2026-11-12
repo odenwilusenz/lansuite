@@ -14,6 +14,14 @@ LANSuite has features like ...
 * **News system** Announce updates and inform all party guests about the latest news with a simple to use news system.
 * **and many more ...** Other features like a picture gallery, a hall of fame and more are included. Give LANSuite a try, install and test it.
 
+## Internet mail
+
+LANSuite sends registration and password links either with PHP `mail()` or with SMTP (STARTTLS, SMTPS or plain SMTP, username and password, no OAuth).
+The Docker image and many hosts have no Sendmail. In that case enable SMTP under Installation, module Mail.
+The sender is the party contact address. The SMTP password is stored encrypted and is never shown again.
+The encryption key stays in `inc/base/config.php`, which is gitignored.
+Administrators can check delivery with Mail → Testmail.
+
 ## Getting started
 
 See our documentation on [lansuite.github.io/lansuite](https://lansuite.github.io/lansuite/).

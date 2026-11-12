@@ -41,6 +41,7 @@ if (!is_dir('modules/'. $_GET['module'] .'/mod_settings')) {
                 $func->information(t('Zu diesem Modul sind keine Einstellungen vorhanden'), NO_LINK);
             } else {
                 if ($stepParameter == 11) {
+                    $secretSaveFailed = false;
                     foreach ($_POST as $key => $val) {
                         // Date + Time Values
                         if (strpos($key, '_value_') > 0) {
@@ -52,10 +53,44 @@ if (!is_dir('modules/'. $_GET['module'] .'/mod_settings')) {
                             }
                             // Other Values
                         } else {
+                            $cfgRow = $database->queryWithOnlyFirstRow('SELECT cfg_type, cfg_value FROM %prefix%config WHERE cfg_key = ?', [$key]);
+                            $isSecretSetting = ($key === 'mail_smtp_pass' || ($cfgRow && $cfgRow['cfg_type'] === 'password'));
+                            if ($isSecretSetting) {
+                                $currentSecret = is_array($cfgRow) ? (string) $cfgRow['cfg_value'] : '';
+                                if ($val === '') {
+                                    if ($currentSecret !== '' && !str_starts_with($currentSecret, 'enc1:')) {
+                                        if (!\LanSuite\Module\Mail\SmtpSecret::ensureKey()) {
+                                            $secretSaveFailed = true;
+                                            continue;
+                                        }
+                                        $encrypted = \LanSuite\Module\Mail\SmtpSecret::encrypt($currentSecret);
+                                        if ($encrypted === '') {
+                                            $secretSaveFailed = true;
+                                            continue;
+                                        }
+                                        $database->query('UPDATE %prefix%config SET cfg_value = ? WHERE cfg_key = ?', [$encrypted, $key]);
+                                    }
+                                    continue;
+                                }
+                                if (!\LanSuite\Module\Mail\SmtpSecret::ensureKey()) {
+                                    $secretSaveFailed = true;
+                                    continue;
+                                }
+                                $encrypted = \LanSuite\Module\Mail\SmtpSecret::encrypt(stripslashes($val));
+                                if ($encrypted === '') {
+                                    $secretSaveFailed = true;
+                                    continue;
+                                }
+                                $val = $encrypted;
+                            }
                             $database->query('UPDATE %prefix%config SET cfg_value = ? WHERE cfg_key = ?', [$val, $key]);
                         }
                     }
-                    $func->confirmation(t('Erfolgreich geändert'), 'index.php?mod=install&action=mod_cfg&module='. $_GET["module"]. '&tab=0');
+                    if ($secretSaveFailed) {
+                        $func->error(t('Die übrigen Einstellungen wurden gespeichert. Das SMTP-Passwort wurde nicht gespeichert, weil inc/base/config.php nicht geschrieben werden konnte.'), 'index.php?mod=install&action=mod_cfg&module='. $_GET["module"]. '&tab=0');
+                    } else {
+                        $func->confirmation(t('Erfolgreich geändert'), 'index.php?mod=install&action=mod_cfg&module='. $_GET["module"]. '&tab=0');
+                    }
                     //invalidate config cache
                     $cache->delete('cfg');
                 } else {
@@ -82,6 +117,11 @@ if (!is_dir('modules/'. $_GET['module'] .'/mod_settings')) {
                         );
                         while ($row = $db->fetch_array($res)) {
                             $row['cfg_desc'] = t($row['cfg_desc']);
+                            $isSecretSetting = ($row['cfg_key'] === 'mail_smtp_pass' || $row['cfg_type'] === 'password');
+                            if ($isSecretSetting) {
+                                $dsp->AddPasswordRow($row['cfg_key'], $row['cfg_desc'] . ' (' . t('Leer lassen, um das gespeicherte Passwort zu behalten.') . ')', '', '', '', 1);
+                                continue;
+                            }
                             if ($row['cfg_type'] == 'string') {
                                 $row['cfg_value'] = t($row['cfg_value']);
                             }

@@ -6,9 +6,60 @@ class UserManager
 
     private ?\LanSuite\Module\Mail\Mail $mail = null;
 
+    /**
+     * Link that lets a new user choose a password. Set by the registration mail.
+     */
+    public string $setPasswordUrl = '';
+
     public function __construct(\LanSuite\Module\Mail\Mail $mail)
     {
         $this->mail = $mail;
+    }
+
+    /**
+     * Reuse an existing one-time code so a second mail does not invalidate the first link.
+     */
+    public function ensureFcode(int $userid): string
+    {
+        global $database;
+
+        $row = $database->queryWithOnlyFirstRow('SELECT fcode FROM %prefix%user WHERE userid = ?', [$userid]);
+        if (!empty($row['fcode'])) {
+            return $row['fcode'];
+        }
+
+        $code = '';
+        for ($x = 0; $x <= 24; $x++) {
+            $code .= chr(random_int(65, 90));
+        }
+        $database->query('UPDATE %prefix%user SET fcode = ? WHERE userid = ?', [$code, $userid]);
+
+        return $code;
+    }
+
+    private function absoluteUrl(string $pathAndQuery): string
+    {
+        global $cfg;
+
+        if (!empty($cfg['sys_partyurl_ssl'])) {
+            $base = $cfg['sys_partyurl_ssl'];
+            if (!str_ends_with($base, '/')) {
+                $base .= '/';
+            }
+
+            return $base . $pathAndQuery;
+        }
+
+        $requestUri = (string) ($_SERVER['REQUEST_URI'] ?? '');
+        $indexPosition = strpos($requestUri, 'index.php');
+        $path = $indexPosition === false ? '/' : substr($requestUri, 0, $indexPosition);
+        if ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (int) ($_SERVER['SERVER_PORT'] ?? 0) === 443) {
+            $proto = 'https';
+        } else {
+            $proto = 'http';
+        }
+
+        return "{$proto}://{$_SERVER['SERVER_NAME']}:{$_SERVER['SERVER_PORT']}{$path}{$pathAndQuery}";
     }
 
     /**
@@ -19,28 +70,8 @@ class UserManager
     {
         global $cfg, $db, $database, $mail, $func;
 
-        $verification_code = '';
-        for ($x = 0; $x <= 24; $x++) {
-            $verification_code .= chr(random_int(65, 90));
-        }
-        $database->query('UPDATE %prefix%user SET fcode = ? WHERE userid = ?', [$verification_code, $id]);
-        $path = substr($_SERVER['REQUEST_URI'], 0, strpos($_SERVER['REQUEST_URI'], "index.php"));
-        //Use the HTTPS party URL if defined, otherwise check what the user is currently using
-        if (!empty($cfg['sys_partyurl_ssl'])) {
-            $verification_link = $cfg['sys_partyurl_ssl'];
-            //make sure that it ends with a slash
-            if (!str_ends_with($cfg['sys_partyurl_ssl'], '/')) {
-                $verification_link .= '/';
-            }
-            $verification_link .= "index.php?mod=usrmgr&action=verify_email&verification_code=$verification_code";
-        } else {//No HTTPS URL defined, but maybe the user is already using it?
-            if ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443) {
-                $proto = 'https';
-            } else {
-                $proto = 'http';
-            }
-            $verification_link = "{$proto}://{$_SERVER['SERVER_NAME']}:{$_SERVER['SERVER_PORT']}{$path}index.php?mod=usrmgr&action=verify_email&verification_code=$verification_code";
-        }
+        $verification_code = $this->ensureFcode((int) $id);
+        $verification_link = $this->absoluteUrl('index.php?mod=usrmgr&action=verify_email&verification_code=' . $verification_code);
         $row = $database->queryWithOnlyFirstRow('SELECT firstname, name, email FROM %prefix%user WHERE userid = ?', [$id]);
         if (!$_POST['firstname']) {
             $_POST['firstname'] = $row['firstname'];
@@ -164,7 +195,19 @@ class UserManager
 
                 $message = str_replace('%USERNAME%', $_POST['username'], $message);
                 $message = str_replace('%EMAIL%', $_POST['email'], $message);
-                $message = str_replace('%PASSWORD%', $_SESSION['tmp_pass'], $message);
+                $userRow = $database->queryWithOnlyFirstRow('SELECT userid FROM %prefix%user WHERE email = ?', [$_POST['email']]);
+                if ($userRow) {
+                    $code = $this->ensureFcode((int) $userRow['userid']);
+                    $this->setPasswordUrl = $this->absoluteUrl('index.php?mod=usrmgr&action=pwrecover&step=3&fcode=' . $code);
+                }
+                $passwordReplacement = $this->setPasswordUrl !== ''
+                    ? t('Lege dein Passwort über diesen Link fest:') . ' ' . $this->setPasswordUrl
+                    : t('Lege dein Passwort über die Funktion "Passwort vergessen" fest.');
+                if (str_contains($message, '%PASSWORD%')) {
+                    $message = str_replace('%PASSWORD%', $passwordReplacement, $message);
+                } elseif (!empty($cfg['signon_autopw']) && $this->setPasswordUrl !== '') {
+                    $message .= "\n\n" . $passwordReplacement;
+                }
                 if ($_POST['clan']) {
                     $row = $database->queryWithOnlyFirstRow("SELECT name FROM %prefix%clan WHERE clanid = ?", [$_POST['clan']]);
                     $clan = $row['name'];

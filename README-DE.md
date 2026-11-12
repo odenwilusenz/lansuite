@@ -19,7 +19,7 @@ LANSuite ist ein Administrationssystem für LAN-Partys.
 
 ## Requirements
 
-* PHP 8.2 (mit den Extensions `mysqli`, `snmp` und `gd`)
+* PHP 8.2 (mit den Extensions `mysqli`, `snmp`, `gd` und `openssl`)
 
 ## Installation
 
@@ -69,6 +69,14 @@ charset=utf8
 
 **Warnung**:
 Chmod auf `0777` zu setzen ist nicht für Produktionssysteme zu empfehlen. Nur euer eigener Webserver sollte in Schreibrechte haben.
+
+### E-Mail-Versand
+
+Der Docker-Container und viele Webhoster haben kein Sendmail. Internet-Mails (Registrierung, Passwort-Link) gehen dann nur über SMTP.
+
+Unter Installation, Modul Mail: SMTP aktivieren und Host, Port, Verschlüsselung (STARTTLS, SMTPS oder keine), Benutzername und Passwort eintragen. Der Absender ist die Kontaktmail der Lanparty (`sys_party_mail`). Das SMTP-Passwort wird verschlüsselt in der Datenbank gespeichert. Der Schlüssel `mail_secret` liegt nur in `inc/base/config.php` und wird beim ersten Speichern eines Passworts angelegt. Diese Datei darf nicht ins Git.
+
+Administratoren können den Versand über Mail, Testmail prüfen.
 
 ## Development
 

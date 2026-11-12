@@ -51,4 +51,14 @@
 		<needed_config></needed_config>
 		<level>1</level>
 	</entry>
+	<entry>
+		<action>testmail</action>
+		<file>testmail</file>
+		<caption>Testmail</caption>
+		<hint>Prüft, ob Internet-Mails versendet werden</hint>
+		<link>?mod=mail&amp;action=testmail</link>
+		<requirement>2</requirement>
+		<needed_config></needed_config>
+		<level>1</level>
+	</entry>
 </menu>

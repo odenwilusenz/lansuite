@@ -393,6 +393,11 @@ class Install
                                                 $module,
                                                 $pos]
                                             );
+                                        } else {
+                                            $database->query(
+                                                "UPDATE %prefix%config SET cfg_type = ?, cfg_group = ?, cfg_desc = ?, cfg_pos = ? WHERE cfg_key = ?",
+                                                [$type, $group, $description, $pos, $name]
+                                            );
                                         }
                                     }
                                 }
@@ -551,10 +556,8 @@ class Install
         $modules_dir = opendir("modules/");
         while ($module = readdir($modules_dir)) {
             if ($func->isModActive($module)) {
-                $menu_found = $database->queryWithOnlyFirstRow("SELECT 1 AS found FROM %prefix%menu WHERE module = ?", [$module]);
-                if (!$menu_found) {
-                    $file = "modules/$module/mod_settings/menu.xml";
-                    if (file_exists($file)) {
+                $file = "modules/$module/mod_settings/menu.xml";
+                if (file_exists($file)) {
                         $handle = fopen($file, "r");
                         $xml_file = fread($handle, filesize($file));
                         fclose($handle);
@@ -587,6 +590,14 @@ class Install
                             ($level == 0)? $pos = $main_pos : $pos = $i;
                             $i++;
 
+                            $existingEntry = $database->queryWithOnlyFirstRow(
+                                "SELECT 1 AS found FROM %prefix%menu WHERE module = ? AND action = ? AND file = ?",
+                                [$module, $action, $file]
+                            );
+                            if ($existingEntry) {
+                                continue;
+                            }
+
                             $database->query(
                                 "INSERT INTO %prefix%menu SET module = ?, action = ?, file = ?, caption = ?, hint = ?, link = ?, requirement = ?, level = ?, pos = ?, needed_config = ?, boxid = ?",
                                 [$module,
@@ -605,7 +616,6 @@ class Install
                     }
                 }
             }
-        }
     }
 
 

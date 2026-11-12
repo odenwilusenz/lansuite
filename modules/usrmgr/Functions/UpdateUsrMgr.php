@@ -45,7 +45,10 @@ function UpdateUsrMgr($id)
             if ($usrmgr->SendSignonMail(0)) {
                 $func->confirmation(t('Dein Passwort und weitere Informationen wurden an deine angegebene E-Mail-Adresse gesendet.'), NO_LINK);
             } elseif ($cfg['sys_internet']) {
-                $func->error(t('Es ist ein Fehler beim Versand der Informations-Email aufgetreten.') .'<br />'. t('Dein Passwort lautet: <b>%1</b>', array($_SESSION['tmp_pass'])), NO_LINK);
+                $setPasswordHint = $usrmgr->setPasswordUrl !== ''
+                    ? '<br />' . t('Lege dein Passwort über diesen Link fest:') . '<br />' . htmlspecialchars($usrmgr->setPasswordUrl, ENT_QUOTES, 'UTF-8')
+                    : '';
+                $func->error(t('Es ist ein Fehler beim Versand der Informations-Email aufgetreten.') . $setPasswordHint, NO_LINK);
             }
         }
 

@@ -113,8 +113,8 @@ switch ($stepParameter) {
                 // Send information mail to all clan members
                 $clanuser = $db->qry('SELECT userid, username, email FROM %prefix%user WHERE clanid=%int%', $_GET['clanid']);
                 while ($data = $db->fetch_array($clanuser)) {
-                    $mail->create_mail($auth['userid'], $data['userid'], t('Clanpasswort geändert'), t('Das Clanpasswort wurde durch den Benutzer %1 in "%2" geändert', [$auth['username'], $_POST['password_original']]));
-                    $mail->create_inet_mail($data['username'], $data['email'], t('Clanpasswort geändert'), t('Das Clanpasswort wurde durch den Benutzer %1 in "%2" geändert', [$auth['username'], $_POST['password_original']]), $cfg['sys_party_mail']);
+                    $mail->create_mail($auth['userid'], $data['userid'], t('Clanpasswort geändert'), t('Das Clanpasswort wurde durch den Benutzer %1 geändert', [$auth['username']]));
+                    $mail->create_inet_mail($data['username'], $data['email'], t('Clanpasswort geändert'), t('Das Clanpasswort wurde durch den Benutzer %1 geändert', [$auth['username']]), $cfg['sys_party_mail']);
                 }
                 $func->log_event(t('Das Clanpasswort wurde durch den Benutzer %1 geändert', $auth['username']), 1, t('clanmgr'));
             }

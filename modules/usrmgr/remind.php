@@ -47,25 +47,38 @@ if (!$cfg['sys_internet']) {
                 $pwrecoverytxt = str_replace("%PARTYNAME%", $cfg['sys_page_title'], $pwrecoverytxt); //replace party name
                 //now assemble it all into a mail
                 $mail->create_inet_mail($user_data['username'], $_POST['pwr_mail'], $cfg['usrmgr_pwrecovery_subject'], $pwrecoverytxt);
-                $func->confirmation(t('Dir wurde nun eine Freischalte-URL an die angegebene Emailadresse gesendet. Mit dem Aufruf dieser URL wird dir neues Passwort generiert werden.'), "index.php");
+                $func->confirmation(t('Dir wurde nun eine Freischalte-URL an die angegebene Emailadresse gesendet. Mit dem Aufruf dieser URL kannst du ein neues Passwort festlegen.'), "index.php");
             }
             break;
 
         // Freischaltecode prüfen, Passwort generieren, Freischaltcode zurücksetzen
         case 3:
-            $user_data = $database->queryWithOnlyFirstRow("SELECT fcode FROM %prefix%user WHERE fcode = ?", [$_GET['fcode']]);
-            if (is_array($user_data) && $user_data['fcode'] && $_GET['fcode'] != '') {
-                $new_pwd = "";
-                for ($x = 0; $x <= 8; $x++) {
-                    $new_pwd .= chr(random_int(65, 90));
-                }
-
-                $database->query("UPDATE %prefix%user SET password = ?, fcode = '' WHERE fcode = ?", [md5($new_pwd), $_GET['fcode']]);
-
-                $func->confirmation(t('Das neue Kennwort wurde erfolgreich generiert.<br>Es lautet:') . "\"<b>$new_pwd</b>\"", "index.php");
-            } else {
-                $func->error(t('Der von dir übermittelte Freischaltecode ist inkorrekt! Es wurde kein neues Kennwort generiert. Bitte prüfe, ob du die URL komplett aus der Benachrichtigungs-Mail kopiert hast.'), "index.php?mod=usrmgr&action=pwrecover&step=1");
+            $fcode = (string) ($_GET['fcode'] ?? '');
+            $user_data = $database->queryWithOnlyFirstRow("SELECT fcode FROM %prefix%user WHERE fcode = ?", [$fcode]);
+            if (!(is_array($user_data) && $user_data['fcode'] && $fcode !== '')) {
+                $func->error(t('Der von dir übermittelte Freischaltecode ist inkorrekt! Es wurde kein neues Kennwort gesetzt. Bitte prüfe, ob du die URL komplett aus der Benachrichtigungs-Mail kopiert hast.'), "index.php?mod=usrmgr&action=pwrecover&step=1");
+                break;
             }
+
+            $newPassword = (string) ($_POST['new_password'] ?? '');
+            $newPasswordRepeat = (string) ($_POST['new_password2'] ?? '');
+            if ($newPassword !== '' || $newPasswordRepeat !== '') {
+                if ($newPassword === '' || $newPassword !== $newPasswordRepeat) {
+                    $func->error(t('Die Passwörter stimmen nicht überein oder sind leer.'), NO_LINK);
+                } else {
+                    $database->query(
+                        "UPDATE %prefix%user SET password = ?, email_verified = 1, fcode = '' WHERE fcode = ?",
+                        [md5($newPassword), $fcode]
+                    );
+                    $func->confirmation(t('Dein Passwort wurde gespeichert. Du kannst dich jetzt einloggen.'), 'index.php');
+                    break;
+                }
+            }
+            $dsp->SetForm('index.php?mod=usrmgr&action=pwrecover&step=3&fcode=' . urlencode($fcode));
+            $dsp->AddSingleRow(t('Bitte lege ein neues Passwort fest.'));
+            $dsp->AddPasswordRow('new_password', t('Neues Passwort'), '', '');
+            $dsp->AddPasswordRow('new_password2', t('Neues Passwort wiederholen'), '', '');
+            $dsp->AddFormSubmitRow(t('Passwort setzen'));
             break;
 
         default:

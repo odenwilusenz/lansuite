@@ -1,5 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <config>
+  <typedefinition>
+    <head>
+      <name>mail_smtp_encryption</name>
+    </head>
+    <entries>
+      <entry>
+        <value>tls</value>
+        <description>STARTTLS (üblich, Port 587)</description>
+      </entry>
+      <entry>
+        <value>ssl</value>
+        <description>SMTPS (üblich, Port 465)</description>
+      </entry>
+      <entry>
+        <value>none</value>
+        <description>Keine Verschlüsselung</description>
+      </entry>
+    </entries>
+  </typedefinition>
   <group>
     <head>
       <name>Allgemein</name>
@@ -34,7 +53,7 @@
     		<name>mail_use_smtp</name>
     		<type>boolean</type>
     		<default>0</default>
-    		<description>Sollen Internet-Mails per SMTP-versendet werden (Auf Linux Servern nicht empfohlen)</description>
+    		<description>Sollen Internet-Mails per SMTP versendet werden? Sonst wird PHP mail() verwendet.</description>
     	</item>
     	<item>
     		<name>mail_smtp_host</name>
@@ -43,14 +62,26 @@
     		<description>Hostname des SMTP-Servers</description>
     	</item>
     	<item>
+    		<name>mail_smtp_port</name>
+    		<type>int</type>
+    		<default>587</default>
+    		<description>Port des SMTP-Servers</description>
+    	</item>
+    	<item>
+    		<name>mail_smtp_encryption</name>
+    		<type>mail_smtp_encryption</type>
+    		<default>tls</default>
+    		<description>Verschlüsselung der SMTP-Verbindung</description>
+    	</item>
+    	<item>
     		<name>mail_smtp_user</name>
     		<type>string</type>
     		<default></default>
-    		<description>Benutzername des SMTP-Servers</description>
+    		<description>Benutzername des SMTP-Servers. Leer lassen, wenn der Server keine Anmeldung verlangt.</description>
     	</item>
     	<item>
     		<name>mail_smtp_pass</name>
-    		<type>string</type>
+    		<type>password</type>
     		<default></default>
     		<description>Passwort des SMTP-Servers</description>
     	</item>
@@ -120,7 +151,6 @@ Hier nochmal deine Daten, die du angegeben hast:
 --Userdata------------------
 Username: %USERNAME%
 E-Mail: %EMAIL%
-Passwort: %PASSWORD%
 Clan: %CLAN%
 ----------------------------
 
@@ -132,7 +162,7 @@ Variablen:
 %PARTYURL%
 %PAGE_TITLE%
 %EMAIL%
-%PASSWORD%
+%PASSWORD% (Link zum Festlegen des Passworts, nicht das Passwort selbst)
 %CLAN%
         </description>
     	</item>
@@ -201,7 +231,7 @@ Variablen:
     		<default>Hallo %USERNAME%,
 
 Du hast ein neues LanSuite Passwort angefordert.
-Damit das neue Passwort generiert wird, gehe bitte auf folgende Webseite: %PATH%
+Damit du ein neues Passwort festlegen kannst, gehe bitte auf folgende Webseite: %PATH%
 
 Dieser zusätzliche Schritt ist notwendig, um zu verifizieren, dass dies deine Email-Adresse ist
 und du somit der legitime Besitzer dieses Lansuite Accounts bist.
