@@ -377,7 +377,7 @@ class Install
                                         $type = $xml->get_tag_content('type', $xml_item);
                                         $default = $xml->get_tag_content('default', $xml_item);
                                         $description = $xml->get_tag_content('description', $xml_item);
-                                        $pos = $xml->get_tag_content('pos', $xml_item);
+                                        $pos = (int) $xml->get_tag_content('pos', $xml_item);
                                         $SettingList[] = $name;
 
                                         // Insert into DB, if not exists
