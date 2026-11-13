@@ -1,11 +1,14 @@
 <?php
 
 /**
- * @param string $string
- * @return float
+ * @param mixed $string
  */
-function SanitizeVal($string)
+function SanitizeVal($string): float
 {
-    $string = str_replace(',', '.', $string);
-    return floatval($string);
+    if ($string === null || $string === '') {
+        return 0.0;
+    }
+
+    $string = str_replace(',', '.', (string) $string);
+    return (float) $string;
 }

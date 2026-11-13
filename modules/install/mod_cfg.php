@@ -178,6 +178,11 @@ if (!is_dir('modules/'. $_GET['module'] .'/mod_settings')) {
                     $dsp->AddFormSubmitRow(t('Weiter'));
                 }
             }
+            $moduleName = preg_replace('/[^a-z0-9_]/i', '', (string) ($_GET['module'] ?? ''));
+            $configExtraFile = dirname(__DIR__) . '/' . $moduleName . '/mod_settings/config_extra.php';
+            if ($moduleName !== '' && is_file($configExtraFile)) {
+                include $configExtraFile;
+            }
             $dsp->EndTab();
 
             $dsp->StartTab(t('Zugriff'), 'delete_group');

@@ -61,7 +61,7 @@
     		<name>paypal_currency_code</name>
     		<type>string</type>
     		<default>EUR</default>
-    		<description>Währung (USD,GBP,JPY,CAD,EUR)</description>
+    		<description>Währung, zum Beispiel CHF, EUR oder USD</description>
     	</item>
     	<item>
     		<name>paypal_desc_name</name>

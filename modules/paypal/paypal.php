@@ -6,42 +6,45 @@
 if ($auth['userid'] == 0 && $cfg['paypal_donation'] == 0) {
     $func->error(t('Du kannst nichts einzahlen wenn du nicht eingeloggt bist.'), "index.php?mod=home");
 } else {
-    $dsp->NewContent(t('Einzahlen'), t('Hier sehen sie was f&uuml;r Betr&auml;ge noch ausstehend sind. W&auml;hlen sie was sie bezahlen m&ouml;chten.'));
+    $dsp->NewContent(t('Einzahlen'), t('Hier sehen sie was für Beträge noch ausstehend sind. Wählen sie was sie bezahlen möchten.'));
     $dsp->AddSmartyTpl('javascript', 'paypal');
     $dsp->SetForm("index.php?mod=paypal&action=createpayment", "paypal");
 
-    // List all partys
     if ($auth['userid'] != 0) {
-        $pay_partys = $db->qry("
-          SELECT
-            *
-          FROM %prefix%party_user AS pu
-          LEFT JOIN %prefix%partys AS p USING(party_id)
-          LEFT JOIN %prefix%party_prices AS price ON price.price_id=pu.price_id
-          WHERE
-            user_id=%int%
-            AND p.senddate > now()
-            AND paid = '0'", $auth['userid']);
+        $paypalObj = new \LanSuite\Module\PayPal\PayPal();
+        $currency = htmlspecialchars($paypalObj->getCurrency(), ENT_QUOTES, 'UTF-8');
+        $payParties = PartyPricesForPayment((int) $auth['userid'], (int) ($auth['group_id'] ?? 0));
+        $payable = [];
+        foreach ($payParties as $pay) {
+            if (SanitizeVal($pay['price'] ?? null) > 0) {
+                $payable[] = $pay;
+            }
+        }
 
-        if ($db->num_rows($pay_partys) > 0) {
-            while ($pay = $db->fetch_array($pay_partys)) {
-                $dsp->AddCheckBoxRow("price[]", $pay['name'], $pay['price_text'] . " " . $pay['price'] . " " . $cfg['paypal_currency_code'], "", null, true, null, $pay['price_id']);
+        if ($payable !== []) {
+            $onlyChoice = count($payable) === 1;
+            foreach ($payable as $pay) {
+                $checked = $onlyChoice || (int) $pay['user_price_id'] === (int) $pay['price_id'];
+                $label = $pay['price_text'] . ' ' . $paypalObj->formatAmount($pay['price']) . ' ' . $currency;
+                $dsp->AddCheckBoxRow('price[]', $pay['name'], $label, '', null, $checked, null, (int) $pay['price_id']);
                 if ($cfg['paypal_depot'] && $pay['depot_price'] > 0) {
-                    $dsp->AddCheckBoxRow("depot[]", $pay['name'], $pay['depot_text'] . " " . $pay['depot_price'] . " " . $cfg['paypal_currency_code'], "", null, null, null, $pay['price_id']);
+                    $depotLabel = $pay['depot_desc'] . ' ' . $paypalObj->formatAmount($pay['depot_price']) . ' ' . $currency;
+                    $dsp->AddCheckBoxRow('depot[]', $pay['name'], $depotLabel, '', null, null, null, (int) $pay['price_id']);
                 }
             }
+        } elseif ($payParties !== []) {
+            $dsp->AddSingleRow(t('Für diese Anmeldung ist kein Preis größer 0 hinterlegt.'));
         } else {
             $dsp->AddSingleRow(t('Alle Eintrittspreise bezahlt.'));
         }
 
         if ($cfg['paypal_catering']) {
-            $dsp->AddTextFieldRow("catering", t('Einzahlung f&uuml;r Catering'), 0, "");
+            $dsp->AddTextFieldRow("catering", t('Einzahlung für Catering'), 0, "");
         }
-        $db->free_result($pay_partys);
     }
 
     if ($cfg['paypal_donation']) {
-        $dsp->AddTextFieldRow("donation", t('Spende f&uuml;r die Organisatoren'), 0, "");
+        $dsp->AddTextFieldRow("donation", t('Spende für die Organisatoren'), 0, "");
     }
 
     $dsp->AddFormSubmitRow(t('Weiter'));

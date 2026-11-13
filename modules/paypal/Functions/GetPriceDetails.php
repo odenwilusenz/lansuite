@@ -1,29 +1,83 @@
 <?php
 
 /**
+ * Prices the signed-up user is allowed to pay.
+ *
+ * A signup without price_id still sees party prices that have no group,
+ * or that match the user's group. group_id 0 means the price is for everyone.
+ *
+ * @return array<int, array<string, mixed>>
+ */
+function PartyPricesForPayment(int $userId, int $groupId, ?int $priceId = null): array
+{
+    global $database;
+
+    $sql = '
+      SELECT
+        p.party_id,
+        p.name,
+        pu.user_id,
+        pu.price_id AS user_price_id,
+        pp.price_id,
+        pp.price_text,
+        pp.price,
+        pp.depot_price,
+        pp.depot_desc
+      FROM %prefix%party_user AS pu
+      INNER JOIN %prefix%partys AS p ON p.party_id = pu.party_id
+      INNER JOIN %prefix%party_prices AS pp ON pp.party_id = pu.party_id
+        AND (
+          pu.price_id = pp.price_id
+          OR (
+            (
+              pu.price_id = 0
+              OR pu.price_id IS NULL
+              OR NOT EXISTS (
+                SELECT 1
+                FROM %prefix%party_prices AS assigned
+                WHERE assigned.price_id = pu.price_id
+              )
+            )
+            AND (pp.group_id = 0 OR pp.group_id IS NULL OR pp.group_id = ?)
+          )
+        )
+      WHERE
+        pu.user_id = ?
+        AND pu.paid = 0
+        AND p.senddate > NOW()';
+
+    $parameters = [$groupId, $userId];
+    if ($priceId !== null) {
+        $sql .= ' AND pp.price_id = ?';
+        $parameters[] = $priceId;
+    }
+    $sql .= ' ORDER BY pp.price_id';
+
+    return $database->queryWithFullResult($sql, $parameters);
+}
+
+/**
  * @param int $priceID
  */
-function GetPriceDetails($priceID): array|bool|null
+function GetPriceDetails($priceID): ?array
 {
-    global $database, $auth;
+    global $auth;
 
-    $result = $database->queryWithOnlyFirstRow('
-      SELECT
-        pu.party_id,
-        pu.user_id,
-        pu.price_id,
-        p.name,
-        price_text,
-        price.price
-      FROM %prefix%party_user AS pu
-      LEFT JOIN %prefix%partys AS p USING(party_id)
-      LEFT JOIN %prefix%party_prices AS price ON price.price_id = pu.price_id
-      WHERE
-        user_id = ?
-        AND pu.price_id = ?', [$auth['userid'], $priceID]);
+    $priceID = (int) $priceID;
+    if ($priceID <= 0) {
+        return null;
+    }
 
-    // Make sure that we only get the value, not the currency items
-    $result['price'] = SanitizeVal($result['price']);
+    $rows = PartyPricesForPayment((int) $auth['userid'], (int) ($auth['group_id'] ?? 0), $priceID);
+    if ($rows === []) {
+        return null;
+    }
+
+    $result = $rows[0];
+    $result['price'] = SanitizeVal($result['price'] ?? null);
+    if ($result['price'] <= 0) {
+        return null;
+    }
 
     return $result;
 }
