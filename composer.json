@@ -31,6 +31,7 @@
         "symfony/http-client": "^6.3 || ^7.0",
         "gregwar/captcha": "^1.2",
         "phpmailer/phpmailer": "^6.9",
+        "stripe/stripe-php": "^16.6",
         "ext-openssl": "*"
     },
     "require-dev": {
@@ -77,6 +78,7 @@
             "LanSuite\\Module\\News\\": "modules/news/Classes/",
             "LanSuite\\Module\\Party\\": "modules/party/Classes/",
             "LanSuite\\Module\\PayPal\\": "modules/paypal/Classes/",
+            "LanSuite\\Module\\Stripe\\": "modules/stripe/Classes/",
             "LanSuite\\Module\\PDF\\": "modules/pdf/Classes/",
             "LanSuite\\Module\\Poll\\": "modules/poll/Classes/",
             "LanSuite\\Module\\Seating\\": "modules/seating/Classes/",
@@ -168,6 +170,7 @@
             "modules/paypal/Functions/GetPriceDetails.php",
             "modules/paypal/Functions/SanitizeVal.php",
             "modules/paypal/Functions/SKUtoParty.php",
+            "modules/stripe/Functions/Prices.php",
             "modules/picgallery/Functions/IsPackage.php",
             "modules/picgallery/Functions/IsSupportedType.php",
             "modules/picgallery/Functions/IsSupportedVideo.php",

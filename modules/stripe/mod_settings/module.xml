@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lansuite-module>
+	<name>stripe</name>
+	<caption>Stripe</caption>
+	<description>Einzahlungen über Stripe Checkout. Es werden die Zahlungsmethoden verwendet, die im Stripe-Konto für die gewählte Währung aktiv sind. TWINT steht bei Zahlungen in CHF zur Verfügung, wenn es im Stripe-Dashboard eingeschaltet ist.</description>
+	<active>0</active>
+	<changeable>1</changeable>
+	<author>LanSuite</author>
+	<email></email>
+	<version>1.0</version>
+	<state>Beta</state>
+</lansuite-module>

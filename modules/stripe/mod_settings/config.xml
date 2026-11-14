@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+ <typedefinition>
+    <head>
+      <name>stripemode</name>
+    </head>
+    <entries>
+  		<entry>
+  			<value>test</value>
+  			<description>Test-Modus</description>
+  		</entry>
+  		<entry>
+  			<value>live</value>
+  			<description>Live-Modus</description>
+  		</entry>
+    </entries>
+  </typedefinition>
+  <group>
+    <head>
+      <name>Allgemein</name>
+    </head>
+    <items>
+    	<item>
+    		<name>stripe_depot</name>
+    		<type>boolean</type>
+    		<default>1</default>
+    		<description>Soll der Besucher auch gleich das Depot zahlen können?</description>
+    	</item>
+    	<item>
+    		<name>stripe_catering</name>
+    		<type>boolean</type>
+    		<default>0</default>
+    		<description>Sollen die Besucher Geld für das Catering einzahlen können?</description>
+    	</item>
+    	<item>
+    		<name>stripe_donation</name>
+    		<type>boolean</type>
+    		<default>1</default>
+    		<description>Sollen die Besucher Spenden einzahlen können?</description>
+    	</item>
+    </items>
+  </group>
+  <group>
+    <head>
+      <name>Daten für Stripe</name>
+    </head>
+    <items>
+    	<item>
+    		<name>stripe_currency_code</name>
+    		<type>string</type>
+    		<default>EUR</default>
+    		<description>Währung, zum Beispiel CHF, EUR oder USD. TWINT verlangt CHF und muss im Stripe-Dashboard aktiviert sein.</description>
+    	</item>
+    	<item>
+    		<name>stripe_desc_name</name>
+    		<type>string</type>
+    		<default>Anmeldung an Party</default>
+    		<description>Zahlungsgrund</description>
+    	</item>
+    	<item>
+    		<name>stripe_mode</name>
+    		<type>stripemode</type>
+    		<default>test</default>
+    		<description>Test- oder Live-Modus. Es werden nur die Schlüssel dieses Modus verwendet.</description>
+    	</item>
+    	<item>
+    		<name>stripe_secret_key_test</name>
+    		<type>password</type>
+    		<default></default>
+    		<description>Stripe Secret Key für den Test-Modus</description>
+    	</item>
+    	<item>
+    		<name>stripe_webhook_secret_test</name>
+    		<type>password</type>
+    		<default></default>
+    		<description>Stripe Webhook Secret für den Test-Modus</description>
+    	</item>
+    	<item>
+    		<name>stripe_secret_key_live</name>
+    		<type>password</type>
+    		<default></default>
+    		<description>Stripe Secret Key für den Live-Modus</description>
+    	</item>
+    	<item>
+    		<name>stripe_webhook_secret_live</name>
+    		<type>password</type>
+    		<default></default>
+    		<description>Stripe Webhook Secret für den Live-Modus</description>
+    	</item>
+    </items>
+  </group>
+</config>

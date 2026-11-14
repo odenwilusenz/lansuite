@@ -410,6 +410,24 @@ if ($config['environment']['configured'] != 0) {
     }
 }
 
+// A signed module webhook answers before the maintenance page and the HTML layout.
+if ($config['environment']['configured'] != 0) {
+    $webhookAction = (string) ($request->query->get('action') ?? '');
+    $webhookModule = (string) ($request->query->get('mod') ?? '');
+    if ($webhookAction === 'webhook' && $webhookModule !== '' && $func->isModActive($webhookModule)) {
+        $webhookPath = '';
+        try {
+            $webhookPath = BuildModuleFilePath($filesystem, ROOT_DIRECTORY, $webhookModule, 'webhook');
+        } catch (\Exception $exception) {
+            $webhookPath = '';
+        }
+        if ($webhookPath !== '') {
+            include_once $webhookPath;
+            exit;
+        }
+    }
+}
+
 /*
  * Initializes the design of lansuite.
  */

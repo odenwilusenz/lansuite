@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<menu>
+	<pos>41</pos>
+	<entry>
+		<caption>Stripe</caption>
+		<hint>Bezahlen mit Stripe</hint>
+		<link>?mod=stripe</link>
+		<requirement>0</requirement>
+		<file>stripe</file>
+		<needed_config></needed_config>
+		<level>0</level>
+	</entry>
+</menu>
