@@ -2,6 +2,11 @@
 
 $dsp->NewContent(t('Besucherkarte'), t('Hier siehst du aus welchen Gegenden Deutschlands Besucher zu dieser Party kommen'));
 
+if (empty($cfg['guestlist_guestmap'])) {
+    $func->information(t('Die Besucherkarte ist deaktiviert.'), 'index.php?mod=guestlist');
+    return;
+}
+
 // Use Googlemaps
 if ($cfg['guestlist_guestmap'] == 2) {
     $where_pid = '';

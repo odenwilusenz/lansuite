@@ -49,7 +49,7 @@
     		<name>stripe_currency_code</name>
     		<type>string</type>
     		<default>EUR</default>
-    		<description>Währung, zum Beispiel CHF, EUR oder USD. TWINT verlangt CHF und muss im Stripe-Dashboard aktiviert sein.</description>
+    		<description>Währung, zum Beispiel CHF, EUR oder USD. Für TWINT CHF eintragen und TWINT im Stripe-Dashboard unter Zahlungsmethoden aktivieren.</description>
     	</item>
     	<item>
     		<name>stripe_desc_name</name>
@@ -61,31 +61,31 @@
     		<name>stripe_mode</name>
     		<type>stripemode</type>
     		<default>test</default>
-    		<description>Test- oder Live-Modus. Es werden nur die Schlüssel dieses Modus verwendet.</description>
+    		<description>Live verwendet nur die Live-Felder, Test nur die Test-Felder.</description>
     	</item>
     	<item>
     		<name>stripe_secret_key_test</name>
     		<type>password</type>
     		<default></default>
-    		<description>Stripe Secret Key für den Test-Modus</description>
+    		<description>Geheimer Test-Schlüssel, beginnt mit sk_test_ oder rk_test_. Der öffentliche Schlüssel pk_test_ gehört nicht hierher.</description>
     	</item>
     	<item>
     		<name>stripe_webhook_secret_test</name>
     		<type>password</type>
     		<default></default>
-    		<description>Stripe Webhook Secret für den Test-Modus</description>
+    		<description>Signing Secret des Test-Webhooks, beginnt mit whsec_.</description>
     	</item>
     	<item>
     		<name>stripe_secret_key_live</name>
     		<type>password</type>
     		<default></default>
-    		<description>Stripe Secret Key für den Live-Modus</description>
+    		<description>Geheimer Live-Schlüssel, beginnt mit sk_live_ oder rk_live_. Der öffentliche Schlüssel pk_live_ gehört nicht hierher.</description>
     	</item>
     	<item>
     		<name>stripe_webhook_secret_live</name>
     		<type>password</type>
     		<default></default>
-    		<description>Stripe Webhook Secret für den Live-Modus</description>
+    		<description>Signing Secret des Live-Webhooks, beginnt mit whsec_.</description>
     	</item>
     </items>
   </group>

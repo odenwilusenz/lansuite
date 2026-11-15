@@ -256,14 +256,15 @@ class StripeClient
         if ($key === '') {
             return t('Stripe Secret Key fehlt. Modus: %1.', $modeLabel);
         }
-        if (str_starts_with($key, 'pk_') || str_starts_with($key, 'rk_')) {
-            return t('Für Stripe wird der Secret Key benötigt.');
+        if (str_starts_with($key, 'pk_')) {
+            return t('Der öffentliche Schlüssel (pk_) wird hier nicht eingetragen. Verwende den geheimen Schlüssel (sk_ oder rk_).');
         }
-        if ($this->mode === 'live' && !str_starts_with($key, 'sk_live_')) {
-            return t('Der Live-Modus erwartet einen Live Secret Key.');
-        }
-        if ($this->mode !== 'live' && !str_starts_with($key, 'sk_test_')) {
-            return t('Der Test-Modus erwartet einen Test Secret Key.');
+        $suffix = $this->mode === 'live' ? 'live' : 'test';
+        $accepted = str_starts_with($key, 'sk_' . $suffix . '_') || str_starts_with($key, 'rk_' . $suffix . '_');
+        if (!$accepted) {
+            return $this->mode === 'live'
+                ? t('Der Live-Modus erwartet einen Schlüssel, der mit sk_live_ oder rk_live_ beginnt.')
+                : t('Der Test-Modus erwartet einen Schlüssel, der mit sk_test_ oder rk_test_ beginnt.');
         }
 
         return null;

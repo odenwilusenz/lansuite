@@ -9,9 +9,5 @@ function ShowGuestMap()
 {
     global $cfg;
 
-    if ($cfg['guestlist_guestmap']) {
-        return true;
-    }
-
-    return false;
+    return (int) ($cfg['guestlist_guestmap'] ?? 0) > 0;
 }
